@@ -1,0 +1,25 @@
+      ******************************************************************
+      * Author: ZACHARY ALEXANDER DAVIS
+      * Date: May 10th, 2025
+      * Purpose: PRINT THE TIC TAC TOE BOARD
+      * Tectonics: cobc
+      ******************************************************************
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. BOARD.
+
+       DATA DIVISION.
+
+       WORKING-STORAGE SECTION.
+
+       LINKAGE SECTION.
+       01  TIC-TAC-TOE-BOARD.
+           05 ROW OCCURS 3 TIMES.
+               10 CELL OCCURS 3 TIMES.
+                   15 CELL-VALUE PIC X VALUE SPACE.
+
+       PROCEDURE DIVISION USING TIC-TAC-TOE-BOARD.
+           DISPLAY "SUCCESSFULLY CALLED".
+
+      *----VOID FUNCTION NO RETURN
+           EXIT PROGRAM.
+       END PROGRAM BOARD.
