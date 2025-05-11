@@ -19,16 +19,20 @@
       *-----------------------
        WORKING-STORAGE SECTION.
        01  PLAYER-MOVE PIC X(4).
+       01  IS-ILLEGAL-MOVE PIC X(1).
 
        77  FIRST-NUMBER      PIC 99.
        77  SECOND-NUMBER     PIC 99.
 
        77  WINNER            PIC X(1).
 
-       01  RAND-FLOAT-X     USAGE COMP-1.
-       01  RAND-INT-X       PIC 9.
-       01  RAND-FLOAT-Y     USAGE COMP-1.
-       01  RAND-INT-Y       PIC 9.
+       77  SEED-VALUE   PIC 9(9).
+       77  RAND-FLOAT-X     USAGE COMP-1.
+       77  RAND-INT-X       PIC 9.
+       77  RAND-FLOAT-Y     USAGE COMP-1.
+       77  RAND-INT-Y       PIC 9.
+
+       77  CURR-TIME    PIC 9(9).
 
        01  TIC-TAC-TOE-BOARD.
            05 ROW OCCURS 3 TIMES.
@@ -40,10 +44,18 @@
       *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
        MAIN-PROCEDURE.
 
+           ACCEPT CURR-TIME FROM TIME
+           MOVE FUNCTION NUMVAL(CURR-TIME) TO SEED-VALUE
+
+      *----Seed the generator
+           COMPUTE RAND-FLOAT-X = FUNCTION RANDOM(SEED-VALUE)
+
            PERFORM FOREVER
 
                PERFORM FOREVER
       *------------Inefficient algorithm but whatever
+
+
                    COMPUTE RAND-FLOAT-X = FUNCTION RANDOM
                    COMPUTE RAND-INT-X = 1 + FUNCTION INTEGER
                    (RAND-FLOAT-X * 3)
@@ -58,29 +70,57 @@
                    END-IF
                END-PERFORM
 
-               CALL "BOARD" USING TIC-TAC-TOE-BOARD
 
-               DISPLAY "YOUR MOVE (X,X): "
-               ACCEPT PLAYER-MOVE
+               MOVE "0" TO IS-ILLEGAL-MOVE
 
-      *--------Clear screen
-               DISPLAY X'1B' & "[2J" & X'1B' & "[H"
+               PERFORM FOREVER
+                   PERFORM CLEAR-SCREEN-PROCEDURE
 
-               MOVE PLAYER-MOVE(1:1) TO FIRST-NUMBER
-               MOVE PLAYER-MOVE(2:2) TO SECOND-NUMBER
+                   PERFORM CHECK-WINNER-PROCEDURE
+
+                   CALL "BOARD" USING TIC-TAC-TOE-BOARD
+
+                   IF IS-ILLEGAL-MOVE = "1"
+                       DISPLAY "ILLEGAL MOVE! TRY AGAIN!"
+                   END-IF
+
+                   DISPLAY "YOUR MOVE (X,X): "
+                   ACCEPT PLAYER-MOVE
+
+                   MOVE "0" TO IS-ILLEGAL-MOVE
+
+                   MOVE PLAYER-MOVE(1:1) TO FIRST-NUMBER
+                   MOVE PLAYER-MOVE(2:2) TO SECOND-NUMBER
+
+                   IF CELL-VALUE (FIRST-NUMBER, SECOND-NUMBER) = SPACE
+                       EXIT PERFORM
+                   END-IF
+
+                   MOVE "1" TO IS-ILLEGAL-MOVE
+
+               END-PERFORM
 
                MOVE "X" TO CELL-VALUE (FIRST-NUMBER, SECOND-NUMBER)
 
-               CALL "CHECK" USING TIC-TAC-TOE-BOARD WINNER
-
-               IF WINNER = "X" OR WINNER = "O"
-                   DISPLAY WINNER " WON!"
-                   EXIT PERFORM
-               END-IF
-
-
+               PERFORM CHECK-WINNER-PROCEDURE
 
            END-PERFORM
 
            STOP RUN.
+
+       CLEAR-SCREEN-PROCEDURE.
+           DISPLAY X'1B' & "[2J" & X'1B' & "[H".
+
+       CHECK-WINNER-PROCEDURE.
+           CALL "CHECK" USING TIC-TAC-TOE-BOARD WINNER
+
+           IF WINNER = "X" OR WINNER = "O"
+               PERFORM CLEAR-SCREEN-PROCEDURE
+
+               CALL "BOARD" USING TIC-TAC-TOE-BOARD
+
+               DISPLAY WINNER " WON!"
+               STOP RUN
+           END-IF.
+
        END PROGRAM TIC-TAC-TOE.
