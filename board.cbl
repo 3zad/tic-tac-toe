@@ -39,6 +39,8 @@
                END-IF
            END-PERFORM
 
+           DISPLAY " "
+
       *----VOID FUNCTION NO RETURN
            EXIT PROGRAM.
        END PROGRAM BOARD.
